@@ -1,0 +1,145 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+{% load customtags %}
+{% block extrastyle %}{{ block.super }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content %}
+ <!-- Nb of Authors -->
+            <div class="col-xl-3 col-md-6 mb-4">
+              <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                  <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                      <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Nb of Authors</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800"> {% number_of_authors request %}</div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Nb of Questions -->
+            <div class="col-xl-3 col-md-6 mb-4">
+              <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                  <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                      <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Nb of Questions</div>
+                      <div class="h5 mb-0 font-weight-bold text-gray-800"> {% number_of_questions request %}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Nb of choices -->
+            <div class="col-xl-3 col-md-6 mb-4">
+              <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                  <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                      <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Number of choices</div>
+                      <div class="row no-gutters align-items-center">
+                        <div class="col-auto">
+                          <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">{% number_of_questions request %}</div>
+                        </div>
+
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+
+<div class="col-lg-6">
+    <div class="card-header py-3 card shadow mb-4 border border-primary">
+      <a href="/admin/my_view">My custom view </a>
+    </div>
+ {% if app_list %}
+    {% for app in app_list %}
+  <!-- Applications -->
+              <div id="content-main" class="animated bounceInLeft card shadow mb-4 border border-primary">
+                <div class="card-header py-3">
+                  <a href="{{ app.app_url }}"><h6 class="m-0 font-weight-bold text-primary">{{ app.name }}</h6></a>
+                </div>
+                <div class="card-body">
+
+                   {% for model in app.models %}
+                       <table width="100%">
+                           <th>
+                               <tr>
+                                   <td width="80%">
+                                       <a href="{{ model.admin_url }}"> <h4 class="small font-weight-bold">{{ model.name }}</h4></a>
+                                   </td>
+                                   <td width="10%">
+                                        <a href="{{ model.add_url }}" class="btn btn-success btn-circle">
+                                        <i class="fas fa-plus-circle"></i>
+                                        </a>
+                                    </td>
+                                   <td width="10%">
+                                        <a href="{{ model.admin_url }}" class="btn btn-warning btn-circle">
+                                        <i class="fas fa-edit"></i>
+                                        </a>
+                                    </td>
+                               </tr>
+                           </th>
+                       </table>
+
+
+                    {% endfor %}
+                </div>
+              </div>
+      {% endfor %}
+{% else %}
+   <div class="bg-white py-2 collapse-inner rounded">
+        <span>{% trans "You don't have permission to view or edit anything." %}</span>
+   </div>
+{% endif %}
+</div>
+{% endblock %}
+
+{% block sidebar %}
+<div>
+  <div id="content-related" class="animated bounceInRight card shadow mb-4 border border-secondary">
+       <div class="card-header py-3">
+           <h4 class="m-0 font-weight-bold text-primary">{% trans 'Recent actions' %}</h4>
+       </div>
+       <div class="card-body">
+        <h5 class="font-weight-bold">{% trans 'My actions' %}</h5>
+            {% load log %}
+            {% get_admin_log 10 as admin_log for_user user %}
+            {% if not admin_log %}
+            <p>{% trans 'None available' %}</p>
+            {% else %}
+            <ul class="actionlist">
+            {% for entry in admin_log %}
+            <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">
+                {% if entry.is_deletion or not entry.get_admin_url %}
+                    {{ entry.object_repr }}
+                {% else %}
+                    <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
+                {% endif %}
+                <br>
+                {% if entry.content_type %}
+                    <span class="mini quiet">{% filter capfirst %}{{ entry.content_type }}{% endfilter %}</span>
+                {% else %}
+                    <span class="mini quiet">{% trans 'Unknown content' %}</span>
+                {% endif %}
+            </li>
+            {% endfor %}
+            </ul>
+            {% endif %}
+       </div>
+  </div>
+</div>
+{% endblock %}
